@@ -1,0 +1,74 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-header {
+  padding: 2.5rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.App-header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 2.25rem;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.pokemon-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.pokemon-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.9));
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  cursor: default;
+}
+
+.pokemon-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 34px rgba(15,23,42,0.12);
+}
+
+.pokemon-sprite {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated; /* sprites look crisp */
+}
+
+.pokemon-name {
+  margin-top: 0.6rem;
+  text-transform: capitalize;
+  color: #0b1220;
+  font-weight: 600;
+}
+
+@media (max-width: 420px) {
+  .App-header h1 { font-size: 1.6rem; }
+  .pokemon-sprite { width: 72px; height: 72px; }
+}
