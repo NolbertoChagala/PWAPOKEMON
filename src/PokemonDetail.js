@@ -12,19 +12,43 @@ export default function PokemonDetail() {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-      .then((res) => {
+    const url = `https://pokeapi.co/api/v2/pokemon/${id}`;
+
+    // Try to show cached response first (if available) so detail pages open offline
+    const tryCacheThenNetwork = async () => {
+      let hadCached = false;
+      try {
+        if (window.caches) {
+          try {
+            const cached = await caches.match(url);
+            if (cached) {
+              const cachedJson = await cached.json();
+              setPokemon(cachedJson);
+              setError(null);
+              hadCached = true;
+              // Do NOT return; still try network to refresh
+            }
+          } catch (e) {
+            // ignore cache read errors
+          }
+        }
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then((data) => {
+        const data = await res.json();
         setPokemon(data);
         setError(null);
-      })
-      .catch((err) => {
-        setError(err.message || 'Error fetching Pokémon');
-      })
-      .finally(() => setLoading(false));
+      } catch (err) {
+        // If we already showed cached data, don't overwrite it with an error; otherwise show an error
+        if (!hadCached) {
+          setError(err.message || 'Error fetching Pokémon');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    tryCacheThenNetwork();
   }, [id]);
 
   if (loading) return <div className="detail-container">Cargando...</div>;
