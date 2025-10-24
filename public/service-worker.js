@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+/* Service Worker: handle caching for offline support on Vercel */
 const CACHE_NAME = 'pokepwa-v1';
 const RUNTIME = 'runtime';
 
@@ -12,10 +14,23 @@ const PRECACHE_URLS = [
 
 // Instalación del Service Worker
 self.addEventListener('install', event => {
+  // Install should be resilient: don't fail the install if one asset is missing on the host.
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(self.skipWaiting())
+    caches.open(CACHE_NAME).then(async cache => {
+      // Add each precache URL individually and ignore failures for missing assets.
+      await Promise.all(PRECACHE_URLS.map(async (url) => {
+        try {
+          // Use cache.add which will fetch and add; wrap in try to avoid rejecting install
+          await cache.add(url);
+        } catch (e) {
+          // Log but don't fail the installation
+          console.warn('SW precache failed for', url, e && e.message);
+        }
+      }));
+    }).then(() => {
+      // Wait until skipWaiting is called properly
+      return self.skipWaiting();
+    })
   );
 });
 
@@ -39,16 +54,22 @@ const handlePokemonImage = (request) => {
     if (response) return response;
 
     return fetch(request).then(response => {
-      if (!response || response.status !== 200 || response.type !== 'basic') {
-        return response;
+      // Cache successful responses; allow opaque/CORS responses as well so cross-origin sprites work offline
+      try {
+        if (response && (response.status === 200 || response.type === 'opaque' || response.type === 'cors')) {
+          const responseToCache = response.clone();
+          caches.open(RUNTIME).then(cache => {
+            try { cache.put(request, responseToCache); } catch (e) { /* ignore */ }
+          });
+        }
+      } catch (e) {
+        // ignore caching errors
       }
 
-      const responseToCache = response.clone();
-      caches.open(RUNTIME).then(cache => {
-        cache.put(request, responseToCache);
-      });
-
       return response;
+    }).catch(() => {
+      // If fetch fails and there is no cached image, try a local placeholder
+      return caches.match('/logo192.png');
     });
   });
 };
