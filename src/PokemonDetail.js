@@ -50,28 +50,28 @@ export default function PokemonDetail() {
 
         <div className="detail-meta">
           <div className="types">
-            {pokemon.types.map(t => (
-              <span key={t.type.name} className="type-badge">{t.type.name}</span>
+            {(pokemon.types || []).map(t => (
+              <span key={t?.type?.name || Math.random()} className="type-badge">{t?.type?.name}</span>
             ))}
           </div>
 
           <h3 className="section-title">Habilidades</h3>
           <ul className="ability-list">
-            {pokemon.abilities.map(ab => (
-              <li key={ab.ability.name} className={`ability-chip ${ab.is_hidden ? 'hidden' : ''}`}>
-                {ab.ability.name}{ab.is_hidden ? ' (oculta)' : ''}
+            {(pokemon.abilities || []).map(ab => (
+              <li key={ab?.ability?.name || Math.random()} className={`ability-chip ${(ab && ab.is_hidden) ? 'hidden' : ''}`}>
+                {ab?.ability?.name}{(ab && ab.is_hidden) ? ' (oculta)' : ''}
               </li>
             ))}
           </ul>
 
           <h3 className="section-title">Stats</h3>
           <ul className="stat-list">
-            {pokemon.stats.map(s => (
-              <li key={s.stat.name} className="stat-row">
-                <span className="stat-name">{s.stat.name}</span>
+            {(pokemon.stats || []).map(s => (
+              <li key={s?.stat?.name || Math.random()} className="stat-row">
+                <span className="stat-name">{s?.stat?.name}</span>
                 <div className="stat-bar-container">
-                  <div className="stat-bar" style={{ width: `${(s.base_stat / 255) * 100}%` }}></div>
-                  <span className="stat-value">{s.base_stat}</span>
+                  <div className="stat-bar" style={{ width: `${((s?.base_stat || 0) / 255) * 100}%` }}></div>
+                  <span className="stat-value">{s?.base_stat ?? '-'}</span>
                 </div>
               </li>
             ))}

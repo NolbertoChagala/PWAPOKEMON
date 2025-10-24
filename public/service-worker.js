@@ -82,12 +82,25 @@ self.addEventListener('fetch', event => {
         if (response) return response;
         return fetch(event.request).then(response => {
           // Cache responses even if they are CORS/opaque (external images handled below)
-          const responseToCache = response.clone();
-          caches.open(RUNTIME).then(cache => cache.put(event.request, responseToCache));
+          try {
+            const responseToCache = response.clone();
+            caches.open(RUNTIME).then(cache => {
+              try { cache.put(event.request, responseToCache); } catch(e) { /* ignore */ }
+            });
+          } catch (e) {
+            // ignore cloning/cache errors
+          }
           return response;
         }).catch(() => {
-          // If offline and we have a cached metadata JSON, return it (already handled above)
-          return caches.match(event.request);
+          // If offline and we have a cached metadata JSON, return it
+          return caches.match(event.request).then(cached => {
+            if (cached) return cached;
+            // Return a JSON 503 response so the client can handle it gracefully
+            return new Response(JSON.stringify({ error: 'offline', message: 'No network and no cached data' }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          });
         });
       })
     );
