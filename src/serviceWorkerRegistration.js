@@ -1,26 +1,32 @@
-// Minimal service worker registration helper
-// Registers the service worker file placed in the public folder (service-worker.js)
-// Usage: import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-//        serviceWorkerRegistration.register();
+
 
 export function register() {
-  if ('serviceWorker' in navigator) {
-    // Wait for the page to load before registering the SW
+  // Solo registrar el service worker en producción
+  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swUrl = `${process.env.PUBLIC_URL || ''}/service-worker.js`;
       navigator.serviceWorker
         .register(swUrl)
         .then((registration) => {
-          console.log('Service Worker registered with scope:', registration.scope);
+          console.log('Service Worker registered for production');
+          // Verificar actualizaciones
+          registration.addEventListener('updatefound', () => {
+            const installingWorker = registration.installing;
+            if (installingWorker == null) return;
+
+            installingWorker.addEventListener('statechange', () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New content available; please refresh');
+              }
+            });
+          });
         })
         .catch((error) => {
-          console.error('Service Worker registration failed:', error);
+          console.error('Error during service worker registration:', error);
         });
     });
   } else {
-    // Service workers not supported
-    // No-op, but keep for parity with CRA helper API
-    console.log('Service Worker not supported in this browser.');
+    console.log('Development mode - Service Worker disabled');
   }
 }
 
