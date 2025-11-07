@@ -14,22 +14,15 @@ export default function PokemonDetail() {
     setLoading(true);
     const url = `https://pokeapi.co/api/v2/pokemon/${id}`;
 
-    // Try to show cached response first (if available) so detail pages open offline
     const tryCacheThenNetwork = async () => {
       let hadCached = false;
       try {
         if (window.caches) {
-          try {
-            const cached = await caches.match(url);
-            if (cached) {
-              const cachedJson = await cached.json();
-              setPokemon(cachedJson);
-              setError(null);
-              hadCached = true;
-              // Do NOT return; still try network to refresh
-            }
-          } catch (e) {
-            // ignore cache read errors
+          const cached = await caches.match(url);
+          if (cached) {
+            const cachedJson = await cached.json();
+            setPokemon(cachedJson);
+            hadCached = true;
           }
         }
 
@@ -37,12 +30,22 @@ export default function PokemonDetail() {
         if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
         setPokemon(data);
-        setError(null);
-      } catch (err) {
-        // If we already showed cached data, don't overwrite it with an error; otherwise show an error
-        if (!hadCached) {
-          setError(err.message || 'Error fetching Pokémon');
+
+        // 🟢 Enviar notificación cuando se carga el Pokémon (solo si tiene permiso)
+        if ('Notification' in window && Notification.permission === 'granted') {
+          if (navigator.serviceWorker?.ready) {
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.active?.postMessage({
+                type: 'SHOW_NOTIFICATION',
+                title: '🎯 ¡Pokémon atrapado!',
+                body: `Has atrapado a ${data.name.toUpperCase()}!`,
+              });
+            });
+          }
         }
+
+      } catch (err) {
+        if (!hadCached) setError(err.message || 'Error fetching Pokémon');
       } finally {
         setLoading(false);
       }
@@ -65,9 +68,7 @@ export default function PokemonDetail() {
           alt={pokemon.name}
           onError={(e) => {
             const fallbackUrl = pokemon.sprites?.front_default;
-            if (e.target.src !== fallbackUrl) {
-              e.target.src = fallbackUrl;
-            }
+            if (e.target.src !== fallbackUrl) e.target.src = fallbackUrl;
           }}
         />
         <h2 className="pokemon-name">{pokemon.name}</h2>
@@ -75,15 +76,15 @@ export default function PokemonDetail() {
         <div className="detail-meta">
           <div className="types">
             {(pokemon.types || []).map(t => (
-              <span key={t?.type?.name || Math.random()} className="type-badge">{t?.type?.name}</span>
+              <span key={t?.type?.name} className="type-badge">{t?.type?.name}</span>
             ))}
           </div>
 
           <h3 className="section-title">Habilidades</h3>
           <ul className="ability-list">
             {(pokemon.abilities || []).map(ab => (
-              <li key={ab?.ability?.name || Math.random()} className={`ability-chip ${(ab && ab.is_hidden) ? 'hidden' : ''}`}>
-                {ab?.ability?.name}{(ab && ab.is_hidden) ? ' (oculta)' : ''}
+              <li key={ab?.ability?.name} className={`ability-chip ${ab.is_hidden ? 'hidden' : ''}`}>
+                {ab.ability.name}{ab.is_hidden ? ' (oculta)' : ''}
               </li>
             ))}
           </ul>
@@ -91,11 +92,11 @@ export default function PokemonDetail() {
           <h3 className="section-title">Stats</h3>
           <ul className="stat-list">
             {(pokemon.stats || []).map(s => (
-              <li key={s?.stat?.name || Math.random()} className="stat-row">
-                <span className="stat-name">{s?.stat?.name}</span>
+              <li key={s?.stat?.name} className="stat-row">
+                <span className="stat-name">{s.stat.name}</span>
                 <div className="stat-bar-container">
-                  <div className="stat-bar" style={{ width: `${((s?.base_stat || 0) / 255) * 100}%` }}></div>
-                  <span className="stat-value">{s?.base_stat ?? '-'}</span>
+                  <div className="stat-bar" style={{ width: `${((s.base_stat || 0) / 255) * 100}%` }}></div>
+                  <span className="stat-value">{s.base_stat ?? '-'}</span>
                 </div>
               </li>
             ))}
