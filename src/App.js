@@ -37,16 +37,30 @@ function Home() {
   };
 
   const enviarNotificacionDesdeSW = () => {
-    if (navigator.serviceWorker && Notification.permission === "granted") {
+    if (Notification.permission !== "granted") {
+      alert("Debes activar primero las notificaciones.");
+      return;
+    }
+
+    // Intenta enviar desde el Service Worker
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "SHOW_NOTIFICATION",
+        title: "🌟 ¡Pokémon atrapado!",
+        body: "Has visto 20 Pokémon nuevos."
+      });
+    } else if (navigator.serviceWorker) {
+      // Si no hay controller activo, usar la Notification API directamente
       navigator.serviceWorker.ready.then((registration) => {
-        registration.active.postMessage({
-          type: "SHOW_NOTIFICATION",
-          title: "🌟 ¡Pokémon atrapado!",
-          body: "Has visto 20 Pokémon nuevos."
+        registration.showNotification("🌟 ¡Pokémon atrapado!", {
+          body: "Has visto 20 Pokémon nuevos.",
+          icon: "/logo192.png",
+          badge: "/logo192.png",
+          tag: "pokemon-alert",
+          requireInteraction: true,
+          vibrate: [200, 100, 200]
         });
       });
-    } else {
-      alert("Debes activar primero las notificaciones.");
     }
   };
 
