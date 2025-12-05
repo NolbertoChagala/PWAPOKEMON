@@ -1,11 +1,8 @@
 pipeline {
     agent any
 
-    environment {
-        SONAR_TOKEN = credentials('sonar-token')
-    }
-
     stages {
+
         stage('Install Dependencies') {
             steps {
                 echo 'Instalando dependencias...'
@@ -23,19 +20,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo 'Ejecutando análisis de SonarQube...'
-
                 withSonarQubeEnv('SonarQube') {
-                    script {
-                        def scannerHome = tool 'sonar-scanner'
-                        sh """
-                    ${scannerHome}/bin/sonar-scanner \
-                    -Dsonar.projectKey=pokepwa \
-                    -Dsonar.projectName='Pokedex PWA' \
-                    -Dsonar.sources=src \
-                    -Dsonar.language=js \
-                    -Dsonar.sourceEncoding=UTF-8
-                """
-                    }
+                    sh """
+                        sonar-scanner \
+                        -Dsonar.projectKey=pokepwa \
+                        -Dsonar.projectName="Pokedex PWA" \
+                        -Dsonar.sources=src \
+                        -Dsonar.language=js \
+                        -Dsonar.sourceEncoding=UTF-8
+                    """
                 }
             }
         }
