@@ -1,13 +1,7 @@
 pipeline {
-    agent {
-        docker { 
-            image 'node:20'  // Imagen con Node.js y npm
-            args '-u root:root' // Evita problemas de permisos
-        }
-    }
+    agent any
 
     environment {
-        // Token de SonarQube (tipo Secret Text en Jenkins)
         SONAR_TOKEN = credentials('sonar-token')
     }
 
@@ -29,9 +23,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "Ejecutando análisis de SonarQube..."
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh 'npm run sonar'
-                }
+                sh 'npm run sonar'
             }
         }
 
@@ -43,7 +35,7 @@ pipeline {
         }
 
         stage('Deploy') {
-            when { branch 'main' } // Solo se ejecuta en main
+            when { branch 'main' }
             steps {
                 echo "Desplegando a producción en Vercel..."
                 withCredentials([
@@ -52,11 +44,8 @@ pipeline {
                     string(credentialsId: 'prj_lfpjctIZg2JeBRJdbPTbUngfppKZ', variable: 'VERCEL_PROJECT_ID')
                 ]) {
                     sh """
-                    # Instala Vercel CLI si no está
                     npm install -g vercel
-                    # Ejecuta deploy
-                    vercel deploy --prod --token=$VERCEL_TOKEN --yes \
-                    --org=$VERCEL_ORG_ID --project=$VERCEL_PROJECT_ID
+                    vercel deploy --prod --token=$VERCEL_TOKEN --yes --org=$VERCEL_ORG_ID --project=$VERCEL_PROJECT_ID
                     """
                 }
             }
