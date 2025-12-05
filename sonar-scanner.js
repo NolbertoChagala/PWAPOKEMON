@@ -1,6 +1,7 @@
-const sonarqubeScanner = require('sonarqube-scanner');
+// sonar-scanner.js
+const scanner = require('sonarqube-scanner').default || require('sonarqube-scanner');
 
-sonarqubeScanner(
+scanner(
   {
     serverUrl: 'http://sonarqube:9000',
     token: process.env.SONAR_TOKEN,
@@ -13,6 +14,6 @@ sonarqubeScanner(
     }
   },
   () => {
-    console.log('Análisis SonarQube completado');
+    console.log('✅ Análisis de SonarQube completado');
   }
 );
