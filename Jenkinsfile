@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonar-token')
-        // Jenkins automáticamente inyecta SONAR_HOST_URL con withSonarQubeEnv
     }
 
     stages {
@@ -27,15 +26,14 @@ pipeline {
                 echo "Ejecutando análisis de SonarQube..."
 
                 withSonarQubeEnv('SonarQube') {
+                    def scannerHome = tool 'sonar-scanner'
                     sh """
-                        sonar-scanner \
+                        ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=pokepwa \
                         -Dsonar.projectName='Pokedex PWA' \
                         -Dsonar.sources=src \
                         -Dsonar.language=js \
-                        -Dsonar.sourceEncoding=UTF-8 \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${SONAR_TOKEN}
+                        -Dsonar.sourceEncoding=UTF-8
                     """
                 }
             }
