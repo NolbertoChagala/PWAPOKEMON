@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonar-token') // Tu token de SonarQube en Jenkins
+        SONAR_TOKEN = credentials('sonar-token') // Token SonarQube
     }
 
     stages {
         stage('Install Dependencies') {
             steps {
                 echo "Instalando dependencias..."
-                sh 'npm install'
+                sh 'npm ci'
             }
         }
 
