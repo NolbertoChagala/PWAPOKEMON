@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker { 
+            image 'node:20'  // Imagen con Node.js y npm
+            args '-u root:root' // Evita problemas de permisos
+        }
+    }
 
     environment {
         // Token de SonarQube (tipo Secret Text en Jenkins)
@@ -47,6 +52,9 @@ pipeline {
                     string(credentialsId: 'prj_lfpjctIZg2JeBRJdbPTbUngfppKZ', variable: 'VERCEL_PROJECT_ID')
                 ]) {
                     sh """
+                    # Instala Vercel CLI si no está
+                    npm install -g vercel
+                    # Ejecuta deploy
                     vercel deploy --prod --token=$VERCEL_TOKEN --yes \
                     --org=$VERCEL_ORG_ID --project=$VERCEL_PROJECT_ID
                     """
