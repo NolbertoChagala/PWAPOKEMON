@@ -1,5 +1,4 @@
-// sonar-scanner.js
-const scanner = require('sonarqube-scanner').default || require('sonarqube-scanner');
+const scanner = require('sonarqube-scanner');
 
 scanner(
   {

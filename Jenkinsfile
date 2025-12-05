@@ -23,9 +23,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "Ejecutando análisis de SonarQube..."
-               
                 withSonarQubeEnv('SonarQube') {
-                    sh 'npm run sonar'
+                    sh 'node sonar-scanner.js'
                 }
             }
         }
@@ -33,7 +32,6 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 echo "Esperando resultado del Quality Gate..."
-                // Esto funciona ahora porque withSonarQubeEnv registró el análisis
                 waitForQualityGate abortPipeline: true
             }
         }
