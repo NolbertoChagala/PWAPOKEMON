@@ -1,6 +1,6 @@
-const scanner = require('sonarqube-scanner');
+const sonarqubeScanner = require('sonarqube-scanner');
 
-scanner(
+sonarqubeScanner(
   {
     serverUrl: 'http://sonarqube:9000',
     token: process.env.SONAR_TOKEN,
@@ -13,6 +13,6 @@ scanner(
     }
   },
   () => {
-    process.exit();
+    console.log('Análisis SonarQube completado');
   }
 );
