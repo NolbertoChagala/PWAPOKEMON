@@ -3,7 +3,7 @@ const scanner = require('sonarqube-scanner').default || require('sonarqube-scann
 
 scanner(
   {
-    serverUrl: 'http://sonarqube:9000',
+    serverUrl: 'http://host.docker.internal:9000', 
     token: process.env.SONAR_TOKEN,
     options: {
       'sonar.projectKey': 'pokedex-pwa',
