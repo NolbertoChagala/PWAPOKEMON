@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonar-token')
+        SONAR_TOKEN = credentials('sonar-token') // Tu token de SonarQube en Jenkins
     }
 
     stages {
@@ -23,13 +23,17 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "Ejecutando análisis de SonarQube..."
-                sh 'npm run sonar'
+               
+                withSonarQubeEnv('SonarQube') {
+                    sh 'npm run sonar'
+                }
             }
         }
 
         stage('Quality Gate') {
             steps {
                 echo "Esperando resultado del Quality Gate..."
+                // Esto funciona ahora porque withSonarQubeEnv registró el análisis
                 waitForQualityGate abortPipeline: true
             }
         }
