@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import PokemonDetail from './PokemonDetail';
 
 function Home() {
@@ -18,9 +18,6 @@ function Home() {
       .catch(err => console.error('Error fetching pokemons:', err));
   }, []);
 
-  /* ==============================
-     🔔 FUNCIONES DE NOTIFICACIÓN
-     ============================== */
   const solicitarPermisoNotificaciones = () => {
     if ("Notification" in window) {
       Notification.requestPermission().then((permiso) => {
@@ -42,7 +39,6 @@ function Home() {
       return;
     }
 
-    // Intenta enviar desde el Service Worker
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: "SHOW_NOTIFICATION",
@@ -50,7 +46,6 @@ function Home() {
         body: "Has visto 20 Pokémon nuevos."
       });
     } else if (navigator.serviceWorker) {
-      // Si no hay controller activo, usar la Notification API directamente
       navigator.serviceWorker.ready.then((registration) => {
         registration.showNotification("🌟 ¡Pokémon atrapado!", {
           body: "Has visto 20 Pokémon nuevos.",
@@ -70,7 +65,6 @@ function Home() {
         <h1>Pokémon List</h1>
         <p className="subtitle">A simple PWA demo using the PokéAPI</p>
 
-        {/* 🔘 Botones para demo de notificaciones */}
         <div style={{ marginBottom: '1rem' }}>
           <button onClick={solicitarPermisoNotificaciones}>Activar notificaciones</button>
           <button onClick={enviarNotificacionDesdeSW} style={{ marginLeft: '10px' }}>
@@ -105,9 +99,11 @@ function Home() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/pokemon/:id" element={<PokemonDetail />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/pokemon/:id" element={<PokemonDetail />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

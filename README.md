@@ -71,4 +71,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 
 <!-- pokedex-pwa
-sqp_9e327a39cdc30c55157fa55ef9cde651c063a0ac -->
+sqp_9e327a39cdc30c55157fa55ef9cde651c063a0ac 
+
+-->
