@@ -3,9 +3,11 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonar-token')
+        // Jenkins automáticamente inyecta SONAR_HOST_URL con withSonarQubeEnv
     }
 
     stages {
+
         stage('Install Dependencies') {
             steps {
                 echo "Instalando dependencias..."
@@ -23,8 +25,18 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "Ejecutando análisis de SonarQube..."
+
                 withSonarQubeEnv('SonarQube') {
-                    sh 'node sonar-scanner.js'
+                    sh """
+                        sonar-scanner \
+                        -Dsonar.projectKey=pokepwa \
+                        -Dsonar.projectName='Pokedex PWA' \
+                        -Dsonar.sources=src \
+                        -Dsonar.language=js \
+                        -Dsonar.sourceEncoding=UTF-8 \
+                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    """
                 }
             }
         }
@@ -46,11 +58,12 @@ pipeline {
                     string(credentialsId: 'prj_lfpjctIZg2JeBRJdbPTbUngfppKZ', variable: 'VERCEL_PROJECT_ID')
                 ]) {
                     sh '''
-                    npm install -g vercel
-                    vercel deploy --prod --token=$VERCEL_TOKEN --yes --org=$VERCEL_ORG_ID --project=$VERCEL_PROJECT_ID
+                        npm install -g vercel
+                        vercel deploy --prod --token=$VERCEL_TOKEN --yes --org=$VERCEL_ORG_ID --project=$VERCEL_PROJECT_ID
                     '''
                 }
             }
         }
+
     }
 }
