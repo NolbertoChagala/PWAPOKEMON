@@ -43,10 +43,10 @@ pipeline {
                     string(credentialsId: '54Icv9M35OGQDrKZK2lwmxoI', variable: 'VERCEL_ORG_ID'),
                     string(credentialsId: 'prj_lfpjctIZg2JeBRJdbPTbUngfppKZ', variable: 'VERCEL_PROJECT_ID')
                 ]) {
-                    sh """
+                    sh '''
                     npm install -g vercel
                     vercel deploy --prod --token=$VERCEL_TOKEN --yes --org=$VERCEL_ORG_ID --project=$VERCEL_PROJECT_ID
-                    """
+                    '''
                 }
             }
         }
